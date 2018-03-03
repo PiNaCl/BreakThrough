@@ -1,12 +1,16 @@
 package up5.poo.breaktrough;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 
-
+/**
+ * 
+ * @author Tinap
+ *
+ *The panel of the game
+ */
 public class PanelBreakThrough extends Pane{
 	
-	Board board;
+	public Board board;
 	
 
 }
