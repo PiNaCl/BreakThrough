@@ -7,13 +7,17 @@ public class GameManager {
 	private Player[] players;
 	private int[] board;
 	private Color currentPlayerIndex;
+	Boolean selected;
+	int selectedTokenIndex;
 	
 	GameManager(){
+		selected = false;
 		board = new int[64];
 		players = new Player[2];
 		players[0]= new Player(Color.WHITE);
 		players[1] = new Player(Color.BLACK);
 		currentPlayerIndex = Color.WHITE;
+		generateBoard();
 	}
 	
 	
@@ -30,6 +34,13 @@ public class GameManager {
 			if(i%8 ==0) System.out.println("");		
 			System.out.print(Integer.valueOf(board[i]) + ", ");
 		}
+	}
+	
+	public int[] getBoard(){
+		return board;
+	}
+	public int getBoardValue(int i){
+		return board[i];
 	}
 	
 	public void updateBoard(Move move){

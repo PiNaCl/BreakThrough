@@ -1,6 +1,6 @@
 package up5.poo.breaktrough;
 
-import up5.poo.breaktrough.BreakthroughUtils.Coordinate;
+import up5.poo.breaktrough.Coordinate;
 /**
  * 
  * a piece in the game
