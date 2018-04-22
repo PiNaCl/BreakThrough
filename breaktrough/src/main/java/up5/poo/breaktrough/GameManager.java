@@ -1,87 +1,176 @@
 package up5.poo.breaktrough;
 
-import up5.poo.breaktrough.Player.Color;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GameManager {
-	
+import javafx.application.Platform;
+import up5.poo.breaktrough.Player.PlayerType;
+
+public class GameManager extends Thread{
+
 	private Player[] players;
-	private int[] board;
-	private Color currentPlayerIndex;
-	Boolean selected;
-	int selectedTokenIndex;
-	
-	GameManager(){
-		selected = false;
-		board = new int[64];
-		players = new Player[2];
-		players[0]= new Player(Color.WHITE);
-		players[1] = new Player(Color.BLACK);
-		currentPlayerIndex = Color.WHITE;
-		generateBoard();
-	}
-	
-	
-	/**
-	 * generate the tokens on the board
-	 */
-	public void generateBoard(){
-		for (int i = 0; i < board.length; i++){
-			board[i] = 0;
-			if ( (Math.abs(( i - ((board.length+1) / 2)))) >= 16) {
-				if (i <= 15) board[i] = -1;
-				else if(i> 16) board[i] = 1;
-			}
-			if(i%8 ==0) System.out.println("");		
-			System.out.print(Integer.valueOf(board[i]) + ", ");
+	private int currentPlayerIndex;
+	private Boolean selected;
+	Boolean isReadyToPlay = false;
+	private int selectedTokenIndex;
+	private Board board;
+	private GameMode mode;
+	private ArrayList<Move> movesPlayed;
+
+	@Override
+	public void run (){
+	/*	try {
+			Thread.sleep(500);
+		} catch (InterruptedException e){
+			e.printStackTrace();
+		}
+*/
+		
+		switch (mode) {
+		case HUMAN:
+			players[0] = new Player(1, this);
+			players[1] = new Player(-1, this);
+			break;
+		case AIH:
+			players[0] = new Player(1, this);
+			players[1] = new AIHandler(-1,this);
+			break;
+		case AI:
+			players[0] = new AIHandler(1,this);
+			players[1] = new AIHandler(-1,this);
+			break;
+		default:
+			players[0] = new Player(1,this);
+			players[1] = new Player(-1,this);
+		}		
+		try {
+			gameLoop();
+		}catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
+	GameManager(GameMode mode) {
+		selected = false;
+		players = new Player[2];
+		currentPlayerIndex = 0;
+		movesPlayed = new ArrayList<>();
+		isReadyToPlay = false;
+		this.mode = mode;
+		this.board = new Board(this);
+	}
 	
-	public int[] getBoard(){
+	public void gameLoop() throws InterruptedException{
+		while (!Utils.isEndGame(board.getTab())) {
+			try{
+				Thread.sleep(100);
+			} catch (InterruptedException e){
+				e.printStackTrace();
+			}
+			if (players[currentPlayerIndex].getMove() != null) {
+				nextTurn();
+			} else {
+				if (players[currentPlayerIndex].getPlayerType() == PlayerType.AI){
+					try {
+					setPlayerMove(getAI(currentPlayerIndex).searchMove(movesPlayed));
+					} catch (SimulationException e) {
+						System.out.println("Broken AI");
+					}
+				}
+			}
+		}
+
+	}
+
+	public void setBoard(Board board){
+		this.board = board;
+	}
+	
+	public Player getPlayer(int index) {
+		return players[index];
+	}
+	public AIHandler getAI(int index) {
+		return (AIHandler) players[index];
+	}
+
+	public void switchPlayerIndex() {
+		if (currentPlayerIndex == 0)
+			this.currentPlayerIndex = 1;
+		else
+			this.currentPlayerIndex = 0;
+	}
+
+	public void selectToken(int index) {
+		selectedTokenIndex = index;
+		selected = true;
+	}
+
+	public void deselectToken() {
+		selected = false;
+	}
+
+	public Boolean hasSelectedToken() {
+		return selected;
+	}
+
+	public void setSelected(Boolean selected) {
+		this.selected = selected;
+	}
+
+	public int getSelectedTokenIndex() {
+		return selectedTokenIndex;
+	}
+
+	public void setSelectedTokenIndex(int selectedTokenIndex) {
+		this.selectedTokenIndex = selectedTokenIndex;
+	}
+
+	public Board getBoard() {
 		return board;
 	}
-	public int getBoardValue(int i){
-		return board[i];
+
+	public void updateBoard(Move move) {
+		Platform.runLater(() -> board.updateBoard(move));
 	}
-	
-	public void updateBoard(Move move){
-		
+
+	public int getPlayerValue() {
+		return currentPlayerIndex == 0 ? 1 : -1;
 	}
-	
-	public void movePawn(int position, int owner, int destination){
-		
+
+	public int getPlayerIndex() {
+		return currentPlayerIndex;
 	}
-	
-	
-	public void switchPlayerIndex(){
-		if (currentPlayerIndex == Color.WHITE) this.currentPlayerIndex = Color.BLACK;
-		else this.currentPlayerIndex = Color.WHITE;
+
+	public void setPlayerMove(Move move) {
+		players[currentPlayerIndex].setMove(move);
 	}
-	
-	public void play(Move move){
-		for (int i  =0; i < board.length; i++){
-			if (i == move.getDestination().getIndex()){
-				if (board[move.getDestination().getIndex()] != 0) {
-					
-				}
-				board[move.getPosition().getIndex()] -= move.getColor();
-				board[move.getDestination().getIndex()] += move.getColor();
-				break;
-			}
-		}
+
+	public void readyToPlay() {
+		isReadyToPlay = true;
 	}
-	public boolean isEndGame(){
-		for(int i =0; i<8; i++){
-			if (board[i] == 1) {
-				return true; 
-			}
-		}
-		
-		for(int i = 48; i< board.length; i++){
-			if (board[i] == -1) {
-				return true;
-			}
-		}
-		return false;
+
+	public enum GameMode {
+		AIH, HUMAN, AI
 	}
+
+	public GameMode getMode() {
+		return mode;
+	}
+
 	
+	public List<Move> getMovesPlayed() {
+		return movesPlayed;
+	}
+
+	/**
+	 * Play the move, change the current player, animate the move
+	 * @throws InterruptedException 
+	 */
+	public void nextTurn() {
+		Move moveToPlay = players[currentPlayerIndex].getMove();
+		board.setTab(Utils.play(moveToPlay, board.getTab()));
+		updateBoard(moveToPlay);
+		movesPlayed.add(moveToPlay);
+		switchPlayerIndex();
+		setPlayerMove(null);
+	}
 }
