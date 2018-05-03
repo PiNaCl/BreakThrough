@@ -56,4 +56,15 @@ public class Board extends GridPane {
 		child = (Cell) getChildren().get(move.getDestination().getIndex());
 		child.showToken(move.getColor() == 1 ? true : false);
 	}
+	
+	public void updateBoard() {
+		for (int i = 0; i < tabValue.length; i++) {
+			if (tabValue[i] == 0) {
+				boxes[i].hideToken();
+			} else {
+				boxes[i].showToken(tabValue[i] == 1 ? true : false);
+
+			}
+		}
+	}
 }

@@ -6,8 +6,8 @@ import java.util.List;
 public class Utils {
 
 	public static boolean isLegal(Move move, int[] state, int playerValue) {
-		return move.getDestination().isInsideBorder() && state[move.getDestination().getIndex()] != move.getColor()
-				&& playerValue == state[move.getPosition().getIndex()] ? true : false;
+		return (playerValue == state[move.getPosition().getIndex()] ? true : false) && move.getDestination().isInsideBorder() && state[move.getDestination().getIndex()] != move.getColor();
+				
 	}
 	
 	public static boolean enemyAhead(Coordinate coord, int[] state, int playerValue){
@@ -17,7 +17,8 @@ public class Utils {
 	public static ArrayList<Move> getPlayerLegalMoves(int[] board, int playerValue) {
 		ArrayList<Move> legalMoves = new ArrayList<>();
 		for (int i = 0; i < board.length; i++) {
-			legalMoves.addAll(getBoxLegalMove(board, playerValue, i));
+			for (int j = 0; j < getBoxLegalMove(board, playerValue, i).size(); j++)
+				legalMoves.add(getBoxLegalMove(board, playerValue, i).get(j));
 		}
 		return legalMoves;
 	}
@@ -124,6 +125,15 @@ public class Utils {
 			}
 		}
 		return tabValue;
+	}
+	
+	public static int[] copyBoard(int[] toCopy){
+		int[] copy = new int[toCopy.length];
+		for(int i =0; i < copy.length; i++){
+			copy[i] = toCopy[i];
+		}
+		return copy;
+		
 	}
 
 }

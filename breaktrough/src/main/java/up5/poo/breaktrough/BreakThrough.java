@@ -18,10 +18,11 @@ public class BreakThrough extends Application{
 	@Override
 	public void start(Stage stage)
 	{
-		GameManager gm = new GameManager(GameMode.AIH);
+		
+		GameManager gm = new GameManager(GameMode.AIH, 2.25954d,  2.25954d);
 		stage.setTitle("BreakThrough");
 		PanelBreakThrough mainPane = new PanelBreakThrough(gm);
-		Scene scene = new Scene(mainPane, 600, 400);
+		Scene scene = new Scene(mainPane, 400, 425);
 		gm.setDaemon(true);
 		gm.start();
 		stage.setScene(scene);

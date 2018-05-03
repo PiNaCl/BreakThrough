@@ -10,7 +10,10 @@ public class Coordinate {
 		this.x = x;
 		this.y = y;
 	}
-	
+	/**
+	 * Generate a coordinate by index
+	 * @param index the index of the box
+	 */
 	public Coordinate (int index)
 	{
 		x = index % 8;

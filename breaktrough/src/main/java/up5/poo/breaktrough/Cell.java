@@ -6,6 +6,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import up5.poo.breaktrough.Player.PlayerType;
 
 public class Cell extends StackPane {
 
@@ -72,7 +73,7 @@ public class Cell extends StackPane {
 							cell.highlight(green);
 						}
 						move = new Move(coordinate, value, coordinate.getNE(value));
-						if (Utils.isLegal(move, gm.getBoard().getTab(), gm.getPlayerValue())) {
+						if (Utils.isLegal(move, gm.getBoard().getTab(), gm.getPlayerValue()) ) {
 							Cell cell = (Cell) gm.getBoard().getChildren().get(coordinate.getIndex() + 7 * value * -1);
 							cell.highlight(green);
 						}
@@ -121,7 +122,7 @@ public class Cell extends StackPane {
 							occuped = false;
 							Cell cell = (Cell) gm.getBoard().getChildren()
 									.get(legal.get(i).getDestination().getIndex());
-							cell.Occuped();
+							cell.isOccuped();
 							cell.value = -gm.getPlayerValue();
 							gm.deselectToken();
 							for (int j = 0; j < legal.size(); j++) {
@@ -164,15 +165,17 @@ public class Cell extends StackPane {
 	}
 
 	public void highlight(Color color) {
+		 if (gm.getPlayer(gm.getPlayerIndex()).getPlayerType() == PlayerType.HUMAN) {
 		highlight.setFill(color);
 		highlight.toFront();
+		 }
 	}
 
 	public void disHighlight() {
 		highlight.toBack();
 	}
 
-	public void Occuped() {
+	public void isOccuped() {
 		this.occuped = true;
 	}
 
